@@ -1,4 +1,4 @@
-
+# proyecto de digitales3
 # Lista para almacenar los textos del programa
 mensaje = [
     "¡Bienvenido al Directorio Telefónico!",
