@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import time
 import subprocess
 import csv
+import os
 
 class MonitorTemperaturaRPI:
-    def __init__(self, duracion_max=60, intervalo=0.5, archivo_csv="temperaturas.csv"):
+    def _init_(self, duracion_max=60, intervalo=0.5, archivo_csv="temperaturas.csv"):
         self.duracion_max = duracion_max
         self.intervalo = intervalo
         self.tiempos = []
@@ -12,13 +13,14 @@ class MonitorTemperaturaRPI:
         self.inicio = time.time()
         self.archivo_csv = archivo_csv
 
+        # Crear archivo CSV si no existe
+        if not os.path.exists(archivo_csv):
+            with open(archivo_csv, mode='w') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Tiempo (s)", "Temperatura (°C)"])
+
         plt.ion()
         self.fig, self.ax = plt.subplots()
-
-        # Crear el archivo CSV y escribir los encabezados si no existe
-        with open(self.archivo_csv, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Tiempo (s)', 'Temperatura (°C)'])
 
     def leer_temperatura(self):
         try:
@@ -35,12 +37,9 @@ class MonitorTemperaturaRPI:
         if temp is not None:
             self.tiempos.append(ahora)
             self.temperaturas.append(temp)
+            self.guardar_csv(ahora, temp)  # Guardar lectura actual en CSV
 
-            # Escribir los nuevos datos en el archivo CSV
-            with open(self.archivo_csv, mode='a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([ahora, temp])
-
+            # Eliminar datos antiguos fuera del rango de duración
             while self.tiempos and self.tiempos[0] < ahora - self.duracion_max:
                 self.tiempos.pop(0)
                 self.temperaturas.pop(0)
@@ -55,23 +54,24 @@ class MonitorTemperaturaRPI:
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
+    def guardar_csv(self, tiempo, temperatura):
+        with open(self.archivo_csv, mode='a') as file:
+            writer = csv.writer(file)
+            writer.writerow([round(tiempo, 2), temperatura])
+
     def ejecutar(self):
         try:
             while plt.fignum_exists(self.fig.number):
                 self.actualizar_datos()
                 self.graficar()
                 time.sleep(self.intervalo)
-
         except KeyboardInterrupt:
             print("Monitoreo interrumpido por el usuario.")
-
         finally:
             print("Monitoreo finalizado.")
             plt.ioff()
             plt.close(self.fig)
 
-
-if __name__ == "__main__":
+if _name_ == "_main_":
     monitor = MonitorTemperaturaRPI()
     monitor.ejecutar()
-
