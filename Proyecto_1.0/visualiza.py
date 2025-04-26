@@ -5,7 +5,7 @@ import csv
 import os
 
 class MonitorTemperaturaRPI:
-    def _init_(self, duracion_max=60, intervalo=0.5, archivo_csv="temperaturas.csv"):
+    def __init__(self, duracion_max=60, intervalo=0.5, archivo_csv="temperaturas.csv"):
         self.duracion_max = duracion_max
         self.intervalo = intervalo
         self.tiempos = []
@@ -72,6 +72,6 @@ class MonitorTemperaturaRPI:
             plt.ioff()
             plt.close(self.fig)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     monitor = MonitorTemperaturaRPI()
     monitor.ejecutar()
